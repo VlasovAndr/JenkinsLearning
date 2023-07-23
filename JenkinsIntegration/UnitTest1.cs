@@ -46,7 +46,7 @@ namespace JenkinsIntegration
                 ["enableVnc"] = true,
                 ["enableVideo"] = false
             });
-            var specificDriver = new RemoteWebDriver(new Uri("http://localhost:4444/wd/hub"), chromeOptions.ToCapabilities());
+            var specificDriver = new RemoteWebDriver(new Uri("http://selenoid:4444/wd/hub"), chromeOptions.ToCapabilities());
 
 
             specificDriver.Navigate().GoToUrl("https://demoqa.com/");
