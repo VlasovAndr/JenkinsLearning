@@ -1,5 +1,7 @@
+using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 using NUnit.Framework;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Remote;
 using WebDriverManager.DriverConfigs.Impl;
 
@@ -29,28 +31,62 @@ namespace JenkinsIntegration
             // var specificDriver = new ChromeDriver(options);
 
             // specificDriver.Manage().Window.Maximize();
+            RemoteWebDriver specificDriver;
 
+            string browser = Environment.GetEnvironmentVariable("BROWSER_NAME");
 
-            // SELENOID
-            var chromeOptions = new ChromeOptions();
-            //chromeOptions.AddUserProfilePreference("download.default_directory", directory);
-            chromeOptions.AddUserProfilePreference("download.prompt_for_download", false);
-            chromeOptions.AddUserProfilePreference("plugins.always_open_pdf_externally", true);
-            chromeOptions.AddUserProfilePreference("browser.download.manager.showWhenStarting", false);
-            chromeOptions.AddUserProfilePreference("safebrowsing.enabled", "true");
-            chromeOptions.AddArgument("no-sandbox");
-            chromeOptions.AddArgument("disable-popup-blocking");
-            chromeOptions.AddAdditionalOption("selenoid:options", new Dictionary<string, object>
+            // Set the default browser to Chrome if no value is provided
+            if (string.IsNullOrEmpty(browser))
             {
-                ["enableLog"] = true,
-                ["enableVnc"] = true,
-                ["enableVideo"] = false
-            });
-            var specificDriver = new RemoteWebDriver(new Uri("http://selenoid:4444/wd/hub"), chromeOptions.ToCapabilities());
+                browser = "Chrome";
+            }
 
+            // Now, you can use the 'browser' variable to launch the desired browser in your test code
+            if (browser.Equals("Chrome", StringComparison.OrdinalIgnoreCase))
+            {
+                // SELENOID
+                var chromeOptions = new ChromeOptions();
+                //chromeOptions.AddUserProfilePreference("download.default_directory", directory);
+                chromeOptions.AddUserProfilePreference("download.prompt_for_download", false);
+                chromeOptions.AddUserProfilePreference("plugins.always_open_pdf_externally", true);
+                chromeOptions.AddUserProfilePreference("browser.download.manager.showWhenStarting", false);
+                chromeOptions.AddUserProfilePreference("safebrowsing.enabled", "true");
+                chromeOptions.AddArgument("no-sandbox");
+                chromeOptions.AddArgument("disable-popup-blocking");
+                chromeOptions.AddAdditionalOption("selenoid:options", new Dictionary<string, object>
+                {
+                    ["enableLog"] = true,
+                    ["enableVnc"] = true,
+                    ["enableVideo"] = false
+                });
+                specificDriver = new RemoteWebDriver(new Uri("http://selenoid:4444/wd/hub"), chromeOptions.ToCapabilities());
+            }
+            else if (browser.Equals("Firefox", StringComparison.OrdinalIgnoreCase))
+            {
+                var options = new FirefoxOptions();
+
+                options.SetPreference("browser.download.prompt_for_download", false);
+                options.SetPreference("pdfjs.disabled", true);  // to always open PDF externally
+                options.SetPreference("browser.download.manager.showWhenStarting", false);
+                options.SetPreference("browser.safebrowsing.enabled", true);
+                options.AddArgument("--no-sandbox");
+                options.AddArgument("--disable-popup-blocking");
+                options.SetPreference("network.cookie.cookieBehavior", 0);
+                options.AddAdditionalOption("selenoid:options", new Dictionary<string, object>
+                {
+                    ["enableLog"] = true,
+                    ["enableVnc"] = true,
+                    ["enableVideo"] = false
+                });
+                specificDriver = new RemoteWebDriver(new Uri("http://selenoid:4444/wd/hub"), options.ToCapabilities());
+            }
+            else
+            {
+                throw new ArgumentException("Unkniwn browser name");
+            }
 
             specificDriver.Navigate().GoToUrl("https://demoqa.com/");
-            Thread.Sleep(5);
+            Thread.Sleep(10);
             specificDriver.Quit();
         }
     }
