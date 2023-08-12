@@ -1,50 +1,77 @@
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
+using NUnit.Allure.Attributes;
+using NUnit.Allure.Core;
 using NUnit.Framework;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Remote;
-using WebDriverManager.DriverConfigs.Impl;
 
 namespace JenkinsIntegration
 {
-    public class Tests
+    [Parallelizable(scope: ParallelScope.All)]
+    [TestFixture]
+    [AllureNUnit]
+    [AllureSuite("AllureSuite for Tests class")]
+    public class Tests1
     {
         [SetUp]
         public void Setup()
         {
+
         }
 
-        [Test]
+        [AllureStep("Step for Allure method with params #{0} and #{1}")]
+        private void Allure(string param1, string param2)
+        {
+            Console.WriteLine($"Allure inside method, param1:{param1}, param2:{param2}");
+        }
+
+        [Test(Description = "Test1 Description")]
+        [AllureTag("NUnit", "Debug")]
+        [AllureIssue("GitHub#1", "https://github.com/unickq/allure-nunit")]
+        [AllureFeature("AllureFeature")]
+        [AllureStep("AllureStep Test1")]
+
         public void Test1()
         {
-            // new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
-            // var options = new ChromeOptions();
+            //new WebDriverManager.DriverManager().SetUpDriver(new ChromeConfig());
+            //var options = new ChromeOptions();
 
-            // options.AddUserProfilePreference("download.prompt_for_download", false);
-            // options.AddUserProfilePreference("plugins.always_open_pdf_externally", true);
-            // options.AddUserProfilePreference("browser.download.manager.showWhenStarting", false);
-            // options.AddUserProfilePreference("safebrowsing.enabled", "true");
-            // options.AddArgument("no-sandbox");
-            // options.AddArgument("disable-popup-blocking");
-            // options.AddUserProfilePreference("profile.cookie_controls_mode", 0);
+            //options.AddUserProfilePreference("download.prompt_for_download", false);
+            //options.AddUserProfilePreference("plugins.always_open_pdf_externally", true);
+            //options.AddUserProfilePreference("browser.download.manager.showWhenStarting", false);
+            //options.AddUserProfilePreference("safebrowsing.enabled", "true");
+            //options.AddArgument("no-sandbox");
+            //options.AddArgument("disable-popup-blocking");
+            //options.AddUserProfilePreference("profile.cookie_controls_mode", 0);
 
-            // var specificDriver = new ChromeDriver(options);
+            //var specificDriver = new ChromeDriver(options);
 
-            // specificDriver.Manage().Window.Maximize();
+            //specificDriver.Manage().Window.Maximize();
+            //specificDriver.Navigate().GoToUrl("https://demoqa.com/");
+            //Thread.Sleep(10);
+            //specificDriver.Quit();
+
+            Allure("firstParam", "secondParam");
+
+            //######################## REMOTE #############################
             RemoteWebDriver specificDriver;
 
             string browser = Environment.GetEnvironmentVariable("BROWSER_NAME");
+            var selenoidUri = "http://selenoid:4444/wd/hub";
 
-            // Set the default browser to Chrome if no value is provided
+
+            //Set the default browser to Chrome if no value is provided
             if (string.IsNullOrEmpty(browser))
             {
-                browser = "Chrome";
+                browser = "Firefox";
+                selenoidUri = "http://localhost:4444/wd/hub";
             }
 
-            // Now, you can use the 'browser' variable to launch the desired browser in your test code
+
+            //Now, you can use the 'browser' variable to launch the desired browser in your test code
             if (browser.Equals("Chrome", StringComparison.OrdinalIgnoreCase))
             {
-                // SELENOID
+                //SELENOID
                 var chromeOptions = new ChromeOptions();
                 //chromeOptions.AddUserProfilePreference("download.default_directory", directory);
                 chromeOptions.AddUserProfilePreference("download.prompt_for_download", false);
@@ -59,7 +86,7 @@ namespace JenkinsIntegration
                     ["enableVnc"] = true,
                     ["enableVideo"] = false
                 });
-                specificDriver = new RemoteWebDriver(new Uri("http://selenoid:4444/wd/hub"), chromeOptions.ToCapabilities());
+                specificDriver = new RemoteWebDriver(new Uri(selenoidUri), chromeOptions.ToCapabilities());
             }
             else if (browser.Equals("Firefox", StringComparison.OrdinalIgnoreCase))
             {
@@ -78,7 +105,7 @@ namespace JenkinsIntegration
                     ["enableVnc"] = true,
                     ["enableVideo"] = false
                 });
-                specificDriver = new RemoteWebDriver(new Uri("http://selenoid:4444/wd/hub"), options.ToCapabilities());
+                specificDriver = new RemoteWebDriver(new Uri(selenoidUri), options.ToCapabilities());
             }
             else
             {
