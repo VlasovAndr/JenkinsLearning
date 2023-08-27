@@ -25,7 +25,7 @@ namespace JenkinsIntegration
             Console.WriteLine($"Allure inside method, param1:{param1}, param2:{param2}");
         }
 
-        [Test(Description = "Test1 Description")]
+        [Test(Description = "Test1 Description"), Category("Test1Category")]
         [AllureTag("NUnit", "Debug")]
         [AllureIssue("GitHub#1", "https://github.com/unickq/allure-nunit")]
         [AllureFeature("AllureFeature")]
